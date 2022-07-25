@@ -7,7 +7,7 @@ const { User } = require("../../models");
 router.get("/", (req, res) => {
     // access our User model and run .findAll() method, equivalent to "SELECT * FROM users"
     User.findAll({
-        attributes:{exclude:['password']}
+        attributes: { exclude: ['password'] }
     })
         .then(dbUserData => res.json(dbUserData))
         .catch(err => {
@@ -20,7 +20,7 @@ router.get("/", (req, res) => {
 router.get("/:id", (req, res) => {
     // findOne method, equivalent to "SELECT * FROM users WHERE id = 1"
     User.findOne({
-        attributes:{exclude:['password']},
+        attributes: { exclude: ['password'] },
         where: {
             id: req.params.id
         }
@@ -60,6 +60,7 @@ router.put("/:id", (req, res) => {
 
     //pass in req.body to provide new data we want to us in the update
     User.update(req.body, {
+        individualHooks: true,
         where: {
             id: req.params.id //use this to indicate where exactly we want new data to be used
         }
