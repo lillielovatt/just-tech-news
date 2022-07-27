@@ -19,5 +19,5 @@ sequelize.sync({ force: false }).then(() => {
 // we use sync method to establish connection to db, "sync" means Sequelize takes models and connects them to assoc DB tables
 // if it doesn't find a table, it'll create it for you
 
-// force:false is default, but if force:true, it drops and re-creates all of DB tables on startup
+// force:false is default, but if force:true, it drops and re-creates all of DB tables on startup (like DROP TABLE IF EXISTS)
 // good when we need to make changes to Sequelize models, as DB needs to know something has changed
