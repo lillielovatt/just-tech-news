@@ -2,7 +2,6 @@ const router = require("express").Router();
 const sequelize = require('../config/connection');
 const { Post, User, Comment } = require('../models');
 
-
 router.get('/', (req, res) => {
     Post.findAll({
         attributes: ['id', 'post_url', 'title', 'created_at',
@@ -34,13 +33,15 @@ router.get('/', (req, res) => {
             console.log(err);
             res.status(500).json(err);
         })
-
-
-
-
-
-
     // now we have a template engine, we can user render and specify which template we want to use
 });
+
+router.get("/login", (req, res) => {
+    if (req.session.loggedIn) {
+        res.redirect('/');
+        return;
+    }
+    res.render('login');
+})
 
 module.exports = router;
