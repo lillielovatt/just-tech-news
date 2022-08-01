@@ -1,6 +1,6 @@
 // 5 routes that will work with User model to perform CRUD - create, read, update, delete
 const router = require("express").Router();
-const { User, Post, Vote } = require("../../models");
+const { User, Post, Vote, Comment } = require("../../models");
 
 // GET /api/users
 router.get("/", (req, res) => {
@@ -27,6 +27,15 @@ router.get("/:id", (req, res) => {
             {
                 model: Post,
                 attributes: ['id', 'title', 'post_url', 'created_at']
+            },
+            {
+                //include Post model on Comment model so we can se which posts a User commented on
+                model: Comment,
+                attributes: ['id', 'comment_text', 'created_at'],
+                include: {
+                    model: Post,
+                    attributes: ['title']
+                }
             },
             {
                 model: Post,
@@ -114,7 +123,6 @@ router.put("/:id", (req, res) => {
 
 // DELETE /api/users/1
 router.delete("/:id", (req, res) => {
-
     User.destroy({
         where: {
             id: req.params.id
