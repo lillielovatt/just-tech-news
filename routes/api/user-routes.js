@@ -1,8 +1,6 @@
 // 5 routes that will work with User model to perform CRUD - create, read, update, delete
-
 const router = require("express").Router();
-const { rmSync } = require("fs");
-const { User } = require("../../models");
+const { User, Post, Vote } = require("../../models");
 
 // GET /api/users
 router.get("/", (req, res) => {
@@ -24,7 +22,19 @@ router.get("/:id", (req, res) => {
         attributes: { exclude: ['password'] },
         where: {
             id: req.params.id
-        }
+        },
+        include: [
+            {
+                model: Post,
+                attributes: ['id', 'title', 'post_url', 'created_at']
+            },
+            {
+                model: Post,
+                attributes: ['title'], //when we query a single user, we get title info of every post they've ever voted on
+                through: Vote,
+                as: 'voted_posts'
+            }
+        ]
     })
         .then(dbUserData => {
             if (!dbUserData) {
@@ -71,11 +81,11 @@ router.post("/login", (req, res) => {
 
             // verify user
             const validPassword = dbUserData.checkPassword(req.body.password);
-            if(!validPassword){
-                res.status(400).json({message:"Incorrect password!"});
+            if (!validPassword) {
+                res.status(400).json({ message: "Incorrect password!" });
                 return;
             }
-            res.json({user:dbUserData,message:"You are now logged in!"});
+            res.json({ user: dbUserData, message: "You are now logged in!" });
         })
 })
 
