@@ -6,11 +6,11 @@ const Comment = require("./Comment");
 // create associations
 User.hasMany(Post, {
     foreignKey: "user_id"
-});
+}); //post references user, user_id for post
 
 Post.belongsTo(User, {
     foreignKey: "user_id"
-});
+}); //post references user, user_id for post
 
 User.belongsToMany(Post, {
     through: Vote,

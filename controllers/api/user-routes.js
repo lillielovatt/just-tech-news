@@ -7,56 +7,56 @@ router.get("/", (req, res) => {
     // access our User model and run .findAll() method, equivalent to "SELECT * FROM users"
     console.log(req.session);
     User.findAll({
-        attributes: { exclude: ['password'] }
+        attributes: { exclude: ["password"] },
     })
-        .then(dbUserData => res.json(dbUserData))
-        .catch(err => {
+        .then((dbUserData) => res.json(dbUserData))
+        .catch((err) => {
             console.log(err);
             res.status(500).json(err);
-        })
+        });
 });
 
 // GET /api/users/1
 router.get("/:id", (req, res) => {
     // findOne method, equivalent to "SELECT * FROM users WHERE id = 1"
     User.findOne({
-        attributes: { exclude: ['password'] },
+        attributes: { exclude: ["password"] },
         where: {
-            id: req.params.id
+            id: req.params.id,
         },
         include: [
             {
                 model: Post,
-                attributes: ['id', 'title', 'post_url', 'created_at']
+                attributes: ["id", "title", "post_url", "created_at"],
             },
             {
                 //include Post model on Comment model so we can se which posts a User commented on
                 model: Comment,
-                attributes: ['id', 'comment_text', 'created_at'],
+                attributes: ["id", "comment_text", "created_at"],
                 include: {
                     model: Post,
-                    attributes: ['title']
-                }
+                    attributes: ["title"],
+                },
             },
             {
                 model: Post,
-                attributes: ['title'], //when we query a single user, we get title info of every post they've ever voted on
+                attributes: ["title"], //when we query a single user, we get title info of every post they've ever voted on
                 through: Vote,
-                as: 'voted_posts'
-            }
-        ]
+                as: "voted_posts",
+            },
+        ],
     })
-        .then(dbUserData => {
+        .then((dbUserData) => {
             if (!dbUserData) {
-                res.status(404).json({ message: 'No user found with this id' });
+                res.status(404).json({ message: "No user found with this id" });
                 return;
             }
             res.json(dbUserData);
         })
-        .catch(err => {
+        .catch((err) => {
             console.log(err);
             res.status(500).json(err);
-        })
+        });
 });
 
 // POST /api/users
@@ -66,9 +66,9 @@ router.post("/", (req, res) => {
         // pass in key/value pairs where keys are what's defined in User modle, and values are what we get from req.body
         username: req.body.username,
         email: req.body.email,
-        password: req.body.password
+        password: req.body.password,
     })
-        .then(dbUserData => {
+        .then((dbUserData) => {
             req.session.save(() => {
                 req.session.user_id = dbUserData.id;
                 req.session.username = dbUserData.username;
@@ -77,7 +77,7 @@ router.post("/", (req, res) => {
                 res.json(dbUserData);
             });
         })
-        .catch(err => {
+        .catch((err) => {
             console.log(err);
             res.status(500).json(err);
         });
@@ -88,32 +88,33 @@ router.post("/login", (req, res) => {
     // expects  {email: 'lernantino@gmail.com', password: 'password1234'}
     User.findOne({
         where: {
-            email: req.body.email
+            email: req.body.email,
+        },
+    }).then((dbUserData) => {
+        if (!dbUserData) {
+            res.status(400).json({
+                message: "No user with that email address!",
+            });
+            return;
         }
-    })
-        .then(dbUserData => {
-            if (!dbUserData) {
-                res.status(400).json({ message: "No user with that email address!" });
-                return;
-            }
 
-            // verify user
-            const validPassword = dbUserData.checkPassword(req.body.password);
-            if (!validPassword) {
-                res.status(400).json({ message: "Incorrect password!" });
-                return;
-            }
+        // verify user
+        const validPassword = dbUserData.checkPassword(req.body.password);
+        if (!validPassword) {
+            res.status(400).json({ message: "Incorrect password!" });
+            return;
+        }
 
-            req.session.save(() => {
-                // declare session variables
-                req.session.user_id = dbUserData.id;
-                req.session.username = dbUserData.username;
-                req.session.loggedIn = true;
+        req.session.save(() => {
+            // declare session variables
+            req.session.user_id = dbUserData.id;
+            req.session.username = dbUserData.username;
+            req.session.loggedIn = true;
 
-                res.json({ user: dbUserData, message: "You are now logged in!" });
-            })
-        })
-})
+            res.json({ user: dbUserData, message: "You are now logged in!" });
+        });
+    });
+});
 
 router.post("/logout", (req, res) => {
     if (req.session.loggedIn) {
@@ -123,49 +124,51 @@ router.post("/logout", (req, res) => {
     } else {
         res.status(404).end();
     }
-})
+});
 
 // PUT /api/users/1
 router.put("/:id", (req, res) => {
     // expects {username:'Lernantino',email:'lernantino@gmail.com',password:'password2234'}
 
-    //pass in req.body to provide new data we want to us in the update
+    //pass in req.body to provide new data we want to use in the update
     User.update(req.body, {
         individualHooks: true,
         where: {
-            id: req.params.id //use this to indicate where exactly we want new data to be used
-        }
+            id: req.params.id, //use this to indicate where exactly we want new data to be used
+        },
     })
-        .then(dbUserData => {
-            if (!dbUserData[0]) { //why in this instance do we look for [0]?
+        .then((dbUserData) => {
+            if (!dbUserData[0]) {
+                //why in this instance do we look for [0]?
                 res.status(400).json({ message: "No user found with this id" });
+                return;
             }
-            res.json(dbUserData)
+            res.json(dbUserData);
         })
-        .catch(err => {
+        .catch((err) => {
             console.log(err);
             res.status(500).json(err);
-        })
+        });
 });
 
 // DELETE /api/users/1
 router.delete("/:id", (req, res) => {
     User.destroy({
         where: {
-            id: req.params.id
-        }
+            id: req.params.id,
+        },
     })
-        .then(dbUserData => {
+        .then((dbUserData) => {
             if (!dbUserData) {
                 res.status(404).json({ message: "No user found with this id" });
                 return;
             }
             res.json(dbUserData);
         })
-        .catch(err => {
+        .catch((err) => {
             console.log(err);
             res.status(500).json(err);
-        })
+        });
 });
 
 module.exports = router;

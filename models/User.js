@@ -3,9 +3,9 @@ const sequelize = require("../config/connection");
 const bcrypt = require("bcrypt");
 
 // create User model
-class User extends Model { 
-    checkPassword(loginPw){
-        return bcrypt.compareSync(loginPw,this.password);
+class User extends Model {
+    checkPassword(loginPw) {
+        return bcrypt.compareSync(loginPw, this.password);
     }
 }
 
@@ -21,12 +21,12 @@ User.init(
             // instruct that this is the Primary Key
             primaryKey: true,
             // turn on auto increment
-            autoIncrement: true
+            autoIncrement: true,
         },
         // define a username column
         username: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: false,
         },
         // define an email column
         email: {
@@ -36,30 +36,36 @@ User.init(
             unique: true,
             // if allowNull is set to false, we can run our data through validators before creating table data
             validate: {
-                isEmail: true
-            }
+                isEmail: true,
+            },
         },
         // define a password column
         password: {
             type: DataTypes.STRING,
             allowNull: false,
             validate: {
-                len: [4] //pw must be at least 4 char long
-            }
-        }
+                len: [4], //pw must be at least 4 char long
+            },
+        },
     },
     {
         hooks: {
             // set up beforeCreate lifecycle "hook" functionality
             async beforeCreate(newUserData) {
-                newUserData.password = await bcrypt.hash(newUserData.password, 10);
+                newUserData.password = await bcrypt.hash(
+                    newUserData.password,
+                    10
+                );
                 return newUserData;
             },
             // set up beforeUpdate lifecycle "hook" functionality
             async beforeUpdate(updatedUserData) {
-                updatedUserData.password = await bcrypt.hash(updatedUserData.password, 10);
+                updatedUserData.password = await bcrypt.hash(
+                    updatedUserData.password,
+                    10
+                );
                 return updatedUserData;
-            }
+            },
         },
 
         // pass in our import sequelize connection (direct connection to our DB)
@@ -71,7 +77,7 @@ User.init(
         // user underscores instead of camel-casing, so (my_var not myVar)
         underscored: true,
         // make it so our modal name stays lowercase in the DB
-        modelName: 'user'
+        modelName: "user",
     }
 );
 
