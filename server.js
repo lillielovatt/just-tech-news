@@ -1,9 +1,10 @@
 const express = require("express");
 const routes = require("./controllers"); //automatically uses index.js if not otherwise specified
 const sequelize = require("./config/connection");
-const path = require('path');
+const path = require("path");
 const exphbs = require("express-handlebars");
-const hbs = exphbs.create({});
+const helpers = require("./utils/helper");
+const hbs = exphbs.create({ helpers });
 const session = require("express-session");
 const SequelizeStore = require("connect-session-sequelize")(session.Store);
 
@@ -15,15 +16,15 @@ const sess = {
     resave: false,
     saveUnitialized: true,
     store: new SequelizeStore({
-        db: sequelize
-    })
+        db: sequelize,
+    }),
 };
 
-app.engine('handlebars', hbs.engine);
-app.set('view engine', 'handlebars');
+app.engine("handlebars", hbs.engine);
+app.set("view engine", "handlebars");
 // middleware that takes all contents of a folder and serves them as static assets
 // useful for front-end specific files like images/stylesheets/JS files
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(session(sess));
